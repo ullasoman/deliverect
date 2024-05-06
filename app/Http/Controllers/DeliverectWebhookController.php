@@ -34,6 +34,7 @@ class DeliverectWebhookController extends Controller
             ];
 
             // return the response from validate job webhook
+            \Log::info($response);
             return $response;
 
         } catch (\Exception $e) {
