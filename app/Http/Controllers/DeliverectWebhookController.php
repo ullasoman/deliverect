@@ -18,16 +18,16 @@ class DeliverectWebhookController extends Controller
             $request_data = $request->all();
         
             $response = [
-                'jobId' => $request_data['jobId'],
-                'canDeliver' => true,
-                'distance' => 10,
-                'pickupTimeETA' => $request_data['pickupTime'],
-                'deliveryLocations' =>[
+                "jobId" => $request_data['jobId'],
+                "canDeliver" => true,
+                "distance" => 10,
+                "pickupTimeETA" => $request_data['pickupTime'],
+                "deliveryLocations" =>[
                     "deliveryId" => "ABC567",
                     "orderId" => $request_data['deliveryLocations'][0]['orderId'],
                     "deliveryTimeETA" => $request_data['deliveryLocations'][0]['deliveryTime']
                 ],
-                'price'=>[
+                "price"=>[
                     "price" => $request_data['deliveryLocations'][0]['payment']['amount'],
                     "taxRate" => 0
                 ]
