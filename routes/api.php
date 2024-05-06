@@ -41,6 +41,6 @@ Route::middleware('auth:sanctum')->group( function () {
     });
 });
 
-    Route::post('validate_job', [DeliverectWebhookController::class, 'validateDeliveryJob']);
-    Route::post('create_job', [DeliverectWebhookController::class, 'createJob']);
-    Route::post('cancel_job', [DeliverectWebhookController::class, 'cancelJob']);
+Route::post('validate_job', [DeliverectWebhookController::class, 'validateDeliveryJob']);
+Route::post('create_job', [DeliverectWebhookController::class, 'createJob']);
+Route::post('cancel_job', [DeliverectWebhookController::class, 'cancelJob']);

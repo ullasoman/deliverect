@@ -15,27 +15,31 @@ class DeliverectWebhookController extends Controller
     public function validateDeliveryJob(Request $request)
     {
         try {
-            $data = $request->all();
+            $request_data = $request->all();
+        
+            $response = [
+                'jobId' => $request_data['jobId'],
+                'canDeliver' => true,
+                'distance' => 10,
+                'pickupTimeETA' => $request_data['pickupTime'],
+                'deliveryLocations' =>[
+                    "deliveryId" => "ABC567",
+                    "orderId" => $request_data['deliveryLocations'][0]['orderId'],
+                    "deliveryTimeETA" => $request_data['deliveryLocations'][0]['deliveryTime']
+                ],
+                'price'=>[
+                    "price" => $request_data['deliveryLocations'][0]['payment']['amount'],
+                    "taxRate" => 0
+                ]
+            ];
 
-            \Log::info('validate job called');
+            // return the response from validate job webhook
+            return $response;
 
-            // Call the same webhook with the request data using Guzzle
-            // $client = new Client();
-
-            // $response = $client->request('POST', 'https://slider-app.com/api/v1/validate_job', [
-            //     'json' => $data,
-            //     'headers' => [
-            //         'accept' => 'application/json',
-            //     ]
-            // ]);
-            return response()->json(['message' => 'Delivery job created successfully', 'data'=>$data], 200);
-
-            // \Log::info($response->getBody()->getContents());
         } catch (\Exception $e) {
             // Handle any exceptions that occur during the request
             \Log::error('Failed to call the webhook: ' . $e->getMessage());
         }
-    
         
     }
     public function createJob(Request $request){
