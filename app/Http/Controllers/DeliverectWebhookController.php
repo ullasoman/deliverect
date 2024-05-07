@@ -23,9 +23,11 @@ class DeliverectWebhookController extends Controller
                 "distance" => 10,
                 "pickupTimeETA" => $request_data['pickupTime'],
                 "deliveryLocations" =>[
-                    "deliveryId" => "ABC567",
-                    "orderId" => $request_data['deliveryLocations'][0]['orderId'],
-                    "deliveryTimeETA" => $request_data['deliveryLocations'][0]['deliveryTime']
+                    [
+                        "deliveryId" => "ABC567",
+                        "orderId" => $request_data['deliveryLocations'][0]['orderId'],
+                        "deliveryTimeETA" => $request_data['deliveryLocations'][0]['deliveryTime']
+                    ]
                 ],
                 "price"=>[
                     "price" => $request_data['deliveryLocations'][0]['payment']['amount'],
