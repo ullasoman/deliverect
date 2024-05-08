@@ -58,35 +58,35 @@ class DeliverectWebhookController extends Controller
             \Log::info($request_data);
             \Log::info('Creating Job');
 
-            // $order = [
-            //     'partner_id' => 1,
-            //     'order_id' => $request_data['deliveryLocations'][0]['orderId'],
-            //     'job_id' => $request_data['jobId'],
-            //     'account' => $request_data['account'],
-            //     'pickup_time' => $request_data['pickupTime'],
-            //     'transport_type' => $request_data['transportType'],
-            //     'channel_order_display_id' => $request_data['deliveryLocations'][0]['channelOrderDisplayId'],
-            //     'delivery_time' => $request_data['deliveryLocations'][0]['deliveryTime'],
-            //     'package_size' => $request_data['deliveryLocations'][0]['packageSize'],
-            //     'order_description' => $request_data['deliveryLocations'][0]['orderDescription'],
-            //     'order_is_already_paid' => $request_data['deliveryLocations'][0]['payment']['orderIsAlreadyPaid'],
-            //     'driver_tip' => $request_data['driverTip'],
-            //     'amount' => $request_data['deliveryLocations'][0]['payment']['amount'],
-            //     'payment_type' => $request_data['deliveryLocations'][0]['payment']['paymentType'],
-            // ];
+            $order = [
+                'partner_id' => 1,
+                'order_id' => $request_data['deliveryLocations'][0]['orderId'],
+                'job_id' => $request_data['jobId'],
+                'account' => $request_data['account'],
+                'pickup_time' => $request_data['pickupTime'],
+                'transport_type' => $request_data['transportType'],
+                'channel_order_display_id' => $request_data['deliveryLocations'][0]['channelOrderDisplayId'],
+                'delivery_time' => $request_data['deliveryLocations'][0]['deliveryTime'],
+                'package_size' => $request_data['deliveryLocations'][0]['packageSize'],
+                'order_description' => $request_data['deliveryLocations'][0]['orderDescription'],
+                'order_is_already_paid' => $request_data['deliveryLocations'][0]['payment']['orderIsAlreadyPaid'],
+                'driver_tip' => $request_data['driverTip'],
+                'amount' => $request_data['deliveryLocations'][0]['payment']['amount'],
+                'payment_type' => $request_data['deliveryLocations'][0]['payment']['paymentType'],
+            ];
 
-            // if($partnerOrder = PartnerOrder::create($order)){
+            if($partnerOrder = PartnerOrder::create($order)){
 
-            //     /* STORE PICKUP & DELIVERY LOCATION DETAILS*/
+                /* STORE PICKUP & DELIVERY LOCATION DETAILS*/
 
-            //     $job_id = $request_data['jobId'];
-            //     $order_id = $partnerOrder->id;
-            //     $pickupDetailsArr = $request['pickupLocation'];
-            //     $deliveryDetailsArr = $request['deliveryLocations'][0];
+                $job_id = $request_data['jobId'];
+                $order_id = $partnerOrder->id;
+                $pickupDetailsArr = $request['pickupLocation'];
+                $deliveryDetailsArr = $request['deliveryLocations'][0];
 
-            //     $this->storePickupDetails($job_id,$order_id,$pickupDetailsArr);
-            //     $this->storeDeliveryDetails($job_id,$order_id,$deliveryDetailsArr);
-            // }
+                $this->storePickupDetails($job_id,$order_id,$pickupDetailsArr);
+                $this->storeDeliveryDetails($job_id,$order_id,$deliveryDetailsArr);
+            }
 
             $response = [
                 "jobId" => $request_data['jobId'],
