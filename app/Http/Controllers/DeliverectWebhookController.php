@@ -49,70 +49,83 @@ class DeliverectWebhookController extends Controller
     }
     public function createJob(Request $request){
 
-        $request_data = $request->all();
+        try {
+            // Create a new order object
 
-        // Create a new order object
+            $request_data = $request->all();
 
-        $order = [
-            'partner_id' => 1,
-            'order_id' => $request_data['deliveryLocations'][0]['orderId'],
-            'job_id' => $request_data['jobId'],
-            'account' => $request_data['account'],
-            'pickup_time' => $request_data['pickupTime'],
-            'transport_type' => $request_data['transportType'],
-            'channel_order_display_id' => $request_data['deliveryLocations'][0]['channelOrderDisplayId'],
-            'delivery_time' => $request_data['deliveryLocations'][0]['deliveryTime'],
-            'package_size' => $request_data['deliveryLocations'][0]['packageSize'],
-            'order_description' => $request_data['deliveryLocations'][0]['orderDescription'],
-            'order_is_already_paid' => $request_data['deliveryLocations'][0]['payment']['orderIsAlreadyPaid'],
-            'driver_tip' => $request_data['driverTip'],
-            'amount' => $request_data['deliveryLocations'][0]['payment']['amount'],
-            'payment_type' => $request_data['deliveryLocations'][0]['payment']['paymentType'],
-        ];
+            \Log::info('Creating Job');
+            \Log::info($request_data);
+            \Log::info('Creating Job');
 
-        if($partnerOrder = PartnerOrder::create($order)){
+            $order = [
+                'partner_id' => 1,
+                'order_id' => $request_data['deliveryLocations'][0]['orderId'],
+                'job_id' => $request_data['jobId'],
+                'account' => $request_data['account'],
+                'pickup_time' => $request_data['pickupTime'],
+                'transport_type' => $request_data['transportType'],
+                'channel_order_display_id' => $request_data['deliveryLocations'][0]['channelOrderDisplayId'],
+                'delivery_time' => $request_data['deliveryLocations'][0]['deliveryTime'],
+                'package_size' => $request_data['deliveryLocations'][0]['packageSize'],
+                'order_description' => $request_data['deliveryLocations'][0]['orderDescription'],
+                'order_is_already_paid' => $request_data['deliveryLocations'][0]['payment']['orderIsAlreadyPaid'],
+                'driver_tip' => $request_data['driverTip'],
+                'amount' => $request_data['deliveryLocations'][0]['payment']['amount'],
+                'payment_type' => $request_data['deliveryLocations'][0]['payment']['paymentType'],
+            ];
 
-            /* STORE PICKUP & DELIVERY LOCATION DETAILS*/
+            if($partnerOrder = PartnerOrder::create($order)){
 
-            $job_id = $request_data['jobId'];
-            $order_id = $partnerOrder->id;
-            $pickupDetailsArr = $request['pickupLocation'];
-            $deliveryDetailsArr = $request['deliveryLocations'][0];
+                /* STORE PICKUP & DELIVERY LOCATION DETAILS*/
 
-            $this->storePickupDetails($job_id,$order_id,$pickupDetailsArr);
-            $this->storeDeliveryDetails($job_id,$order_id,$deliveryDetailsArr);
+                $job_id = $request_data['jobId'];
+                $order_id = $partnerOrder->id;
+                $pickupDetailsArr = $request['pickupLocation'];
+                $deliveryDetailsArr = $request['deliveryLocations'][0];
+
+                $this->storePickupDetails($job_id,$order_id,$pickupDetailsArr);
+                $this->storeDeliveryDetails($job_id,$order_id,$deliveryDetailsArr);
+            }
+
+            $response = [
+                "jobId" => $request_data['jobId'],
+                "canDeliver" => true,
+                "pickupTimeETA" => $request_data['pickupTime'],
+                "distance" => 10,
+                "externalJobId" => "DJ123456",
+                "price"=>[
+                    "price" => $request_data['deliveryLocations'][0]['payment']['amount'],
+                    "taxRate" => 0
+                ],
+                "courier"=>[
+                    "courierId" => "D1234",
+                    "firstName" => "Delivery",
+                    "lastName" => "Rider",
+                    "phoneNumber" => "0032494112233",
+                    "transportType" => "bicycle"
+                ],
+                "deliveryLocations" =>[
+                    [
+                        "deliveryId" => "ABC567",
+                        "orderId" => $request_data['deliveryLocations'][0]['orderId'],
+                        "channelOrderDisplayId" => $request_data['deliveryLocations'][0]['channelOrderDisplayId'],
+                        "deliveryTimeETA" => $request_data['deliveryLocations'][0]['deliveryTime'],
+                        "deliveryRemarks" => ""
+                    ]
+                ],
+            ];
+
+            // return the response from validate job webhook
+            return $response;
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to call the create_job webhook: ' . $e->getMessage());
         }
 
-        $response = [
-            "jobId" => $request_data['jobId'],
-            "canDeliver" => true,
-            "pickupTimeETA" => $request_data['pickupTime'],
-            "distance" => 10,
-            "externalJobId" => "DJ123456",
-            "price"=>[
-                "price" => $request_data['deliveryLocations'][0]['payment']['amount'],
-                "taxRate" => 0
-            ],
-            "courier"=>[
-                "courierId" => "D1234",
-                "firstName" => "Delivery",
-                "lastName" => "Rider",
-                "phoneNumber" => "0032494112233",
-                "transportType" => "bicycle"
-            ],
-            "deliveryLocations" =>[
-                [
-                    "deliveryId" => "ABC567",
-                    "orderId" => $request_data['deliveryLocations'][0]['orderId'],
-                    "channelOrderDisplayId" => $request_data['deliveryLocations'][0]['channelOrderDisplayId'],
-                    "deliveryTimeETA" => $request_data['deliveryLocations'][0]['deliveryTime'],
-                    "deliveryRemarks" => ""
-                ]
-            ],
-        ];
+        $request_data = $request->all();
 
-        // return the response from validate job webhook
-        return $response;
+        
 
       //  return response()->json(['message' => 'Delivery job created successfully', 'data'=>$data], 200);
     }
