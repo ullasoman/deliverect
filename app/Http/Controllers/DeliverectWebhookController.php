@@ -54,10 +54,6 @@ class DeliverectWebhookController extends Controller
 
             $request_data = $request->all();
 
-            \Log::info('Creating Job');
-            \Log::info($request_data);
-            \Log::info('Creating Job');
-
             $order = [
                 'partner_id' => 1,
                 'order_id' => $request_data['deliveryLocations'][0]['orderId'],
@@ -150,7 +146,11 @@ class DeliverectWebhookController extends Controller
 
     }
     public function storeDeliveryDetails($job_id,$order_id,$request_data){
-
+        
+        \Log::info('Creating Job');
+        \Log::info($request_data);
+        \Log::info('Creating Job');
+        
         $data = [
             'partner_id' => 1,
             'job_id' => $job_id,
