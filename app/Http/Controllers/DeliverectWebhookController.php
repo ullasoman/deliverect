@@ -82,6 +82,10 @@ class DeliverectWebhookController extends Controller
 
                 $this->storePickupDetails($job_id,$order_id,$pickupDetailsArr);
                 $this->storeDeliveryDetails($job_id,$order_id,$deliveryDetailsArr);
+
+                /* PUSHING EXTERNAL ORDER TO SLIDER SERVER */
+                $this->puhingOrderToSliderServer($request_data);
+                /* PUSHING EXTERNAL ORDER TO SLIDER SERVER */
             }
 
             $response = [
@@ -147,10 +151,6 @@ class DeliverectWebhookController extends Controller
     }
     public function storeDeliveryDetails($job_id,$order_id,$request_data){
         
-        \Log::info('storeDeliveryDetails');
-        \Log::info($request_data);
-        \Log::info('storeDeliveryDetails');
-
         $data = [
             'partner_id' => 1,
             'job_id' => $job_id,
@@ -181,5 +181,76 @@ class DeliverectWebhookController extends Controller
         \Log::info('cancel_job');
 
        // return response()->json(['message' => 'Delivery job cancelled successfully', 'data'=>$data], 200);
+    }
+    public function puhingOrderToSliderServer($request_data){
+
+        try {
+
+            $pickup_lat = $request_data['pickupLocation']['latitude'];
+            $pickup_lng = $request_data['pickupLocation']['longitude'];
+
+            $delivery_lat = $request_data['deliveryLocations'][0]['latitude'];
+            $delivery_lng = $request_data['deliveryLocations'][0]['longitude'];
+
+            $latitude = [$pickup_lat,$delivery_lat];
+            $longitude = [$pickup_lng,$delivery_lng];
+            
+            $getdata = GoogleDistanceMatrix($latitude, $longitude);
+
+            $order_data = [
+                "isExternalOrder" => true,
+                "service_type" => 1,
+                "vehicle_type" => 1,
+                "schedule_time" => null,
+                "tip" => $request_data['driverTip'],
+                "receiver_phone_number" => $request_data['deliveryLocations'][0]['phone'],
+                "coupon_code" => null,
+                "distance" => $getdata['distance'],
+                "duration" => $getdata['duration'],
+                "tasks" =>[
+                    [
+                        "task_type_id" => 1,
+                        "address" => $request_data['pickupLocation']['name'],
+                        "latitude" => $request_data['pickupLocation']['latitude'],
+                        "longitude" => $request_data['pickupLocation']['longitude'],
+                        "short_name" => $request_data['pickupLocation']['street'],
+                        "flat_no" => $request_data['pickupLocation']['streetNumber'],
+                        "direction" => $request_data['pickupLocation']['remarks'],
+                        "city" => $request_data['pickupLocation']['city']
+                    ],
+                    [
+                        "task_type_id" => 2,
+                        "address" => $request_data['deliveryLocations'][0]['name'],
+                        "latitude" => $request_data['deliveryLocations'][0]['latitude'],
+                        "longitude" => $request_data['deliveryLocations'][0]['longitude'],
+                        "short_name" => $request_data['deliveryLocations'][0]['street'],
+                        "flat_no" => null,
+                        "direction" => $request_data['deliveryLocations'][0]['deliveryRemarks'],
+                        "city" => $request_data['deliveryLocations'][0]['city']
+                    ]
+                ],
+            ];
+
+            $client = new Client();
+
+            $base_url = 'http://127.0.0.1:8000';
+
+            $slider_webhook = $base_url.'/api/v1/create-external-order';
+
+            $response = $client->request('POST', $slider_webhook, [
+                'headers' => [
+                    'accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $order_data, // Send the payload data here
+            ]);
+
+            // Convert response body to string
+            $responseBody = $response->getBody();
+
+            return $responseBody;
+        } catch (\Exception $e) {
+            \Log::error('Failed to push the order to slider: ' . $e->getMessage());
+        }
     }
 }
